@@ -38,11 +38,23 @@ export const getCompanyFinancials = tool({
     };
 
     const companyData = financialData?.[company];
+    const companyYearData = companyData?.[year];
 
     if (!companyData) {
       return {
+        company,
+        year,
         found: false,
+        message: "Financial data not available!.",
       };
     }
+
+    return {
+      company,
+      year,
+      found: true,
+      currency: "USD billions",
+      ...companyYearData,
+    };
   },
 });
