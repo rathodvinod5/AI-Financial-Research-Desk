@@ -15,8 +15,13 @@ export const getCompanyFinancials = tool({
       .max(2026)
       .describe("The financial year to retrieve"),
   }),
-  strict: true,
-  execute: async ({ company, year }) => {
+  execute: async ({ company, year }, runContext) => {
+    const { researchId, userId, logger } = runContext.context;
+
+    logger.info(
+      `Research ${researchId}: fetching financial data for ${company}`,
+    );
+
     const financialData = {
       NVIDIA: {
         2025: {
@@ -53,6 +58,7 @@ export const getCompanyFinancials = tool({
       company,
       year,
       found: true,
+      requestedBy: userId,
       currency: "USD billions",
       ...companyYearData,
     };
@@ -68,7 +74,11 @@ export const getMarketData = tool({
       .string()
       .describe("The company name, for example NVIDIA or Apple"),
   }),
-  execute: async ({ company }) => {
+  execute: async ({ company }, runContext) => {
+    const { researchId, userId, logger } = runContext.context;
+
+    logger.info(`Research ${researchId}: fetching market data for ${company}`);
+
     const marketData = {
       NVIDIA: {
         ticker: "NVDA",

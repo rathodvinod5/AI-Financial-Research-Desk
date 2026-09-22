@@ -5,26 +5,37 @@ import {
   getCompanyFinancials,
   getMarketData,
 } from "./tools/financial-tools.js";
+import { createResearchContext } from "./context/research-context.js";
 
 const researchAgent = new Agent({
   name: "Financial Research Agent",
   instructions: `You are a financial research assistant.
-  
-  When the user asks about a company's financial performance,
-  use the available financial tools to retrieve the data.
 
-  Do not invent financial numbers.
+    Use get_company_financials when financial performance
+    information is required.
 
-  Clearly distinguish retrieved facts from your own analysis.
+    Use get_market_data when current market information
+    is required.
 
-  Do not provide personalized investment advice.`,
+    Never invent financial or market numbers.
+
+    Clearly distinguish facts from analysis.
+
+    Do not provide personalized investment advice.`,
   tools: [getCompanyFinancials, getMarketData],
 });
 
 async function main() {
+  const researchContext = createResearchContext({
+    researchId: "research-001",
+    userId: "user-123",
+    company: "NVIDIA",
+  });
   const query = `Analyze NVIDIA. Give me its 2025 financial performance 
   and current market information.`;
-  const result = await run(researchAgent, query);
+  const result = await run(researchAgent, query, {
+    context: researchContext,
+  });
 
   console.log("Final output: ", result?.finalOutput);
 }
