@@ -1,7 +1,10 @@
 import "dotenv/config";
 import { Agent, run, Runner } from "@openai/agents";
 import { z } from "zod";
-import { getCompanyFinancials } from "./tools/financial-tools.js";
+import {
+  getCompanyFinancials,
+  getMarketData,
+} from "./tools/financial-tools.js";
 
 const researchAgent = new Agent({
   name: "Financial Research Agent",
@@ -15,11 +18,12 @@ const researchAgent = new Agent({
   Clearly distinguish retrieved facts from your own analysis.
 
   Do not provide personalized investment advice.`,
-  tools: [getCompanyFinancials],
+  tools: [getCompanyFinancials, getMarketData],
 });
 
 async function main() {
-  const query = "Analyze NVIDIA's financial performance for 2025.";
+  const query = `Analyze NVIDIA. Give me its 2025 financial performance 
+  and current market information.`;
   const result = await run(researchAgent, query);
 
   console.log("Final output: ", result?.finalOutput);

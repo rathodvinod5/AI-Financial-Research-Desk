@@ -58,3 +58,46 @@ export const getCompanyFinancials = tool({
     };
   },
 });
+
+export const getMarketData = tool({
+  name: "get_market_data",
+  description: `Get current market information such as stock price, market capaitalization
+  and daily price change for public company.`,
+  parameters: z.object({
+    company: z
+      .string()
+      .describe("The company name, for example NVIDIA or Apple"),
+  }),
+  execute: async ({ company }) => {
+    const marketData = {
+      NVIDIA: {
+        ticker: "NVDA",
+        price: 182.41,
+        marketCap: 4450,
+        dailyChangePercent: 1.84,
+      },
+      Apple: {
+        ticker: "AAPL",
+        price: 251.32,
+        marketCap: 3720,
+        dailyChangePercent: -0.42,
+      },
+    };
+
+    if (!marketData[company]) {
+      return {
+        company,
+        found: false,
+        message: "Market data is not available.",
+      };
+    }
+
+    return {
+      company,
+      found: true,
+      currency: "USD",
+      marketCapUnit: "USD billions",
+      ...marketData[company],
+    };
+  },
+});
