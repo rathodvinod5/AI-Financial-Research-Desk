@@ -51,8 +51,7 @@ async function main() {
 
   const result = await run(researchManagerAgent, query, {
     context: researchContext,
-    // @ts-ignore
-    hooks: new MyRunHooks(),
+    // hooks: new MyRunHooks(),
   });
 
   console.log("\n--- Financial Research Desk ---\n");
