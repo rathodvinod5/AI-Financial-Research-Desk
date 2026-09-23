@@ -44,13 +44,10 @@ async function main() {
     company: "NVIDIA",
   });
 
-  const query = `Analyze NVIDIA's financial performance for 2025.
+  const query = `Analyze NVIDIA's recent business developments and news.
 
-    Include:
-    - financial performance
-    - current market information
-    - important findings
-    - potential risk flags`;
+    Identify the major developments and explain
+    what they could mean for the company.`;
 
   const result = await run(researchManagerAgent, query, {
     context: researchContext,
