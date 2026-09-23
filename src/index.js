@@ -8,6 +8,7 @@ import {
 import { createResearchContext } from "./context/research-context.js";
 import { financialReserachOutput } from "./schemas/research-output.js";
 import { financialAnalystAgent } from "./agents/financial-analyst.js";
+import { researchManagerAgent } from "./agents/research-manager.js";
 
 const researchAgent = new Agent({
   name: "Financial Research Agent",
@@ -44,10 +45,13 @@ async function main() {
 
   const query = `Analyze NVIDIA's financial performance for 2025.
 
-  Include its financial metrics, current market information,
-  important findings, and potential risk flags`;
+    Include:
+    - financial performance
+    - current market information
+    - important findings
+    - potential risk flags`;
 
-  const result = await run(financialAnalystAgent, query, {
+  const result = await run(researchManagerAgent, query, {
     context: researchContext,
   });
 
