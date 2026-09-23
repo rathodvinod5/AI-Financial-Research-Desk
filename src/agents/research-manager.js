@@ -1,5 +1,6 @@
 import { Agent } from "@openai/agents";
 import { financialAnalystAgent } from "./financial-analyst.js";
+import { marketAnalystAgent } from "./market-analyst.js";
 
 const financialAnalystAgentAsTool = financialAnalystAgent.asTool({
   toolName: "financial_analysis",
@@ -26,4 +27,20 @@ export const researchManagerAgent = new Agent({
   You remain responsible for the final response.
   `,
   tools: [financialAnalystAgentAsTool],
+  handoffs: [marketAnalystAgent],
+});
+
+researchManagerAgent.on("agent_start", (ctx, agent) => {
+  console.log(`\n[Event: agent_start] ${agent.name}`);
+});
+
+researchManagerAgent.on("agent_handoff", (ctx, agent) => {
+  console.log(`\n🔀[Event: agent_handoff] CRITICAL TRANSITION DETECTED!`);
+  console.log(`    Agents: ${agent.name || "Unknown"}`);
+});
+
+researchManagerAgent.on("agent_end", (ctx, output) => {
+  console.log(
+    `\n[Event: agent_end]${researchManagerAgent.name} has finished execution.`,
+  );
 });

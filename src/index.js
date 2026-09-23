@@ -9,6 +9,7 @@ import { createResearchContext } from "./context/research-context.js";
 import { financialReserachOutput } from "./schemas/research-output.js";
 import { financialAnalystAgent } from "./agents/financial-analyst.js";
 import { researchManagerAgent } from "./agents/research-manager.js";
+import { MyRunHooks } from "./hooks/agent-listeners.js";
 
 const researchAgent = new Agent({
   name: "Financial Research Agent",
@@ -53,6 +54,8 @@ async function main() {
 
   const result = await run(researchManagerAgent, query, {
     context: researchContext,
+    // @ts-ignore
+    hooks: new MyRunHooks(),
   });
 
   console.log("\n--- Financial Research Desk ---\n");
