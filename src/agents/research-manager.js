@@ -53,16 +53,36 @@ export const researchManagerAgent = new Agent({
 });
 
 researchManagerAgent.on("agent_start", (ctx, agent) => {
-  console.log(`\n[Event: agent_start] ${agent.name}`);
+  console.log(`\n⏯️ [Event: agent_start] ${agent.name}`);
 });
 
 researchManagerAgent.on("agent_handoff", (ctx, agent) => {
-  console.log(`\n🔀[Event: agent_handoff] CRITICAL TRANSITION DETECTED!`);
+  console.log(`\n🔀 [Event: agent_handoff] CRITICAL TRANSITION DETECTED!`);
   console.log(`    Agents: ${agent.name || "Unknown"}`);
 });
 
+researchManagerAgent.on(
+  "agent_tool_start",
+  (ctx, toolInstance, { toolCall }) => {
+    console.log(
+      `\n🧰 [Event: agent_tool_call_start] ${researchManagerAgent.name} is running 
+      tool: "${toolInstance.name}" with arguments:`,
+    );
+  },
+);
+
+researchManagerAgent.on(
+  "agent_tool_end",
+  (ctx, toolInstance, result, { toolCall }) => {
+    console.log(
+      `\n🧰 [Event: agent_tool_call_end] "${toolInstance.name}" execution complete. 
+      Result returned: "${result}"`,
+    );
+  },
+);
+
 researchManagerAgent.on("agent_end", (ctx, output) => {
   console.log(
-    `\n[Event: agent_end]${researchManagerAgent.name} has finished execution.`,
+    `\n🛑 [Event: agent_end]${researchManagerAgent.name} has finished execution.`,
   );
 });
