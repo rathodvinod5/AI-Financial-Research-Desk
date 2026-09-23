@@ -1,6 +1,7 @@
 import { Agent } from "@openai/agents";
 import { financialAnalystAgent } from "./financial-analyst.js";
 import { marketAnalystAgent } from "./market-analyst.js";
+import { newAnalystAgent } from "./news-analyst.js";
 
 const financialAnalystAgentAsTool = financialAnalystAgent.asTool({
   toolName: "financial_analysis",
@@ -8,25 +9,46 @@ const financialAnalystAgentAsTool = financialAnalystAgent.asTool({
     Financial Analyst Specialist.`,
 });
 
+const newsAnalystAgentAsTool = newAnalystAgent.asTool({
+  toolName: "news_analysis",
+  toolDescription: `Delegate recent company news and business development analysis to the News Analyst`,
+});
+
 export const researchManagerAgent = new Agent({
   name: "research_manager_agent",
-  instructions: `You are an Reseach Manager of an AI Financial Research Desk
-  
-  Your responsibility is to cordinate financial research.
+  instructions: `
+    You are the Research Manager of an AI Financial Research Desk.
 
-  When the user asks for companies financial analysis:
-  1. Delegate the financial analysis to the Financial Analyst.
-  2. Review the specialist's result.
-  3. Present the result clearly to the user
-  4. Do not invent financial data
-  5. Do not provide personalised investment advice
+    You coordinate research by delegating specialized tasks.
 
-  The Financial Analyst is responsible for retrieving and
-  analyzing financial and market data.
+    Use financial_analysis when the user needs:
+    - revenue
+    - growth
+    - margins
+    - financial performance
+    - market capitalization
+    - stock price
+    - financial metrics
 
-  You remain responsible for the final response.
+    Use news_analysis when the user needs:
+    - recent company news
+    - business developments
+    - competition
+    - geopolitical developments
+    - external events affecting a company
+
+    If the user specifically wants a direct conversation about
+    market information or market movements, hand off to the
+    Market Analyst.
+
+    You remain responsible for the final response when using
+    specialist agents as tools.
+
+    Never invent information.
+
+    Do not provide personalized investment advice.
   `,
-  tools: [financialAnalystAgentAsTool],
+  tools: [financialAnalystAgentAsTool, newsAnalystAgentAsTool],
   handoffs: [marketAnalystAgent],
 });
 
