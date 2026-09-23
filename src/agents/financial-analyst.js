@@ -6,7 +6,9 @@ import {
 import { financialReserachOutput } from "../schemas/research-output.js";
 
 export const financialAnalystAgent = new Agent({
-  name: "financial_analyst_agent",
+  name: "Financial Analyst",
+  handoffDescription: `Specialist agent for analysing companies financial 
+    performance and market data`,
   instructions: `
     You are a financial analyst specializing in company-level research.
 
@@ -25,8 +27,6 @@ export const financialAnalystAgent = new Agent({
     8. Return your analysis using the required structured format.
 
     Keep your analysis factual and concise.`,
-  handoffDescription: `Specialist agent for analysing companies financial 
-    performance and market data`,
   tools: [getCompanyFinancials, getMarketData],
   outputType: financialReserachOutput,
 });
