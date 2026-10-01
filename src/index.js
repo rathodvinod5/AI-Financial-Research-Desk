@@ -1,5 +1,11 @@
 import "dotenv/config";
-import { Agent, MemorySession, run, Runner } from "@openai/agents";
+import {
+  Agent,
+  InputGuardrailTripwireTriggered,
+  MemorySession,
+  run,
+  Runner,
+} from "@openai/agents";
 import { z } from "zod";
 import readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
@@ -23,25 +29,6 @@ async function main() {
   const session = new MemorySession({
     sessionId: "research-session-001",
   });
-
-  // First run
-  // let query = `Analyze NVIDIA's financial performance for 2025.`;
-  // const firstResult = await run(researchManagerAgent, query, {
-  //   context: researchContext,
-  //   session,
-  //   // hooks: new MyRunHooks(),
-  // });
-
-  console.log(
-    "\n" + "=".repeat(40) + "\nFinancial Research Desk\n" + "=".repeat(40),
-  );
-  // console.log("\nQuery 1: ", query);
-  // console.log("Assistant:\n");
-  // console.log(
-  //   typeof firstResult.finalOutput === "string"
-  //     ? firstResult.finalOutput.replace(/\\n/g, "\n")
-  //     : JSON.stringify(firstResult.finalOutput, null, 2),
-  // );
 
   const rl = readline.createInterface({
     input: stdin,
@@ -85,6 +72,16 @@ async function main() {
           );
         }
       } catch (err) {
+        if (err instanceof InputGuardrailTripwireTriggered) {
+          console.log(
+            "\nAssistant: I can help with financial and company research, " +
+              "market analysis, financial performance, and business developments.",
+          );
+
+          console.log();
+          continue;
+        }
+
         console.log("Error while processing the request.\n", err);
         console.log();
       }
