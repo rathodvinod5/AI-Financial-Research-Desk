@@ -48,6 +48,7 @@ async function main() {
     sessionId: "research-session-001",
   });
 
+  // First run
   let query = `Analyze NVIDIA's financial performance for 2025.`;
   const firstResult = await run(researchManagerAgent, query, {
     context: researchContext,
@@ -66,6 +67,8 @@ async function main() {
       : JSON.stringify(firstResult.finalOutput, null, 2),
   );
 
+  // Second run
+  console.log("\n" + "=".repeat(40) + " Query 2 " + "=".repeat(40));
   query = "What were the main financial risks you identified?";
   console.log("\nQuery 2: ", query);
   const secondResult = await run(researchManagerAgent, query, {
@@ -78,6 +81,21 @@ async function main() {
     typeof secondResult.finalOutput === "string"
       ? secondResult.finalOutput.replace(/\\n/g, "\n")
       : JSON.stringify(secondResult.finalOutput, null, 2),
+  );
+
+  // Third run
+  console.log("\n" + "=".repeat(40) + " Query 3 " + "=".repeat(40));
+  query = "Now tell me about the recent business developments.";
+  console.log("\nQuery 3: ", query);
+  const thirdResult = await run(researchManagerAgent, query, {
+    context: researchContext,
+    session,
+  });
+  console.log("\nAssistant:\n");
+  console.log(
+    typeof thirdResult.finalOutput === "string"
+      ? thirdResult.finalOutput.replace(/\\n/g, "\n")
+      : JSON.stringify(thirdResult.finalOutput, null, 2),
   );
 }
 
