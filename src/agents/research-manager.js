@@ -2,6 +2,7 @@ import { Agent } from "@openai/agents";
 import { financialAnalystAgent } from "./financial-analyst.js";
 import { marketAnalystAgent } from "./market-analyst.js";
 import { newAnalystAgent } from "./news-analyst.js";
+import { financialResearchInputGuardrail } from "../guradrails/research-input-guradrails.js";
 
 const financialAnalystAgentAsTool = financialAnalystAgent.asTool({
   toolName: "financial_analysis",
@@ -15,7 +16,7 @@ const newsAnalystAgentAsTool = newAnalystAgent.asTool({
 });
 
 export const researchManagerAgent = new Agent({
-  name: "research_manager_agent",
+  name: "Research Manager",
   instructions: `
     You are the Research Manager of an AI Financial Research Desk.
 
@@ -50,6 +51,7 @@ export const researchManagerAgent = new Agent({
   `,
   tools: [financialAnalystAgentAsTool, newsAnalystAgentAsTool],
   handoffs: [marketAnalystAgent],
+  inputGuardrails: [financialResearchInputGuardrail],
 });
 
 researchManagerAgent.on("agent_start", (ctx, agent) => {

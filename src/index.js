@@ -1,6 +1,14 @@
 import "dotenv/config";
-import { Agent, MemorySession, run, Runner } from "@openai/agents";
+import {
+  Agent,
+  InputGuardrailTripwireTriggered,
+  MemorySession,
+  run,
+  Runner,
+} from "@openai/agents";
 import { z } from "zod";
+import readline from "node:readline/promises";
+import { stdin, stdout } from "node:process";
 import {
   getCompanyFinancials,
   getMarketData,
@@ -10,32 +18,6 @@ import { financialReserachOutput } from "./schemas/research-output.js";
 import { financialAnalystAgent } from "./agents/financial-analyst.js";
 import { researchManagerAgent } from "./agents/research-manager.js";
 import { MyRunHooks } from "./hooks/agent-listeners.js";
-
-// const researchAgent = new Agent({
-//   name: "Financial Research Agent",
-//   instructions: `You are a financial research assistant.
-
-//     Your job is to analyze a company's financial and market data.
-
-//     Use get_company_financials when financial performance
-//     information is required.
-
-//     Use get_market_data when market information is required.
-
-//     Never invent financial or market numbers.
-
-//     Based only on the retrieved data
-//     1. Summarize the companies financial performance
-//     2. Summarise it's market information
-//     3. Indentify important findings
-//     4. Indentify potential risk flags
-
-//     Do not provide personalised investment advice.
-
-//     return the result using the required structured format`,
-//   tools: [getCompanyFinancials, getMarketData],
-//   outputType: financialReserachOutput,
-// });
 
 async function main() {
   const researchContext = createResearchContext({
@@ -48,55 +30,65 @@ async function main() {
     sessionId: "research-session-001",
   });
 
-  // First run
-  let query = `Analyze NVIDIA's financial performance for 2025.`;
-  const firstResult = await run(researchManagerAgent, query, {
-    context: researchContext,
-    session,
-    // hooks: new MyRunHooks(),
+  const rl = readline.createInterface({
+    input: stdin,
+    output: stdout,
   });
 
-  console.log(
-    "\n" + "=".repeat(40) + "Financial Research Desk" + "=".repeat(40),
-  );
-  console.log("\nQuery 1: ", query);
-  console.log("Assistant:\n");
-  console.log(
-    typeof firstResult.finalOutput === "string"
-      ? firstResult.finalOutput.replace(/\\n/g, "\n")
-      : JSON.stringify(firstResult.finalOutput, null, 2),
-  );
+  console.log("\n======================================");
+  console.log("     AI FINANCIAL RESEARCH DESK");
+  console.log("======================================");
 
-  // Second run
-  console.log("\n" + "=".repeat(40) + " Query 2 " + "=".repeat(40));
-  query = "What were the main financial risks you identified?";
-  console.log("\nQuery 2: ", query);
-  const secondResult = await run(researchManagerAgent, query, {
-    context: researchContext,
-    session,
-  });
+  console.log("\nAsk me anything about your research.");
+  console.log("Type 'exit' to quit.\n");
 
-  console.log("\nAssistant:\n");
-  console.log(
-    typeof secondResult.finalOutput === "string"
-      ? secondResult.finalOutput.replace(/\\n/g, "\n")
-      : JSON.stringify(secondResult.finalOutput, null, 2),
-  );
+  try {
+    while (true) {
+      try {
+        const question = await rl.question("\nYou: ");
+        const input = question.trim();
 
-  // Third run
-  console.log("\n" + "=".repeat(40) + " Query 3 " + "=".repeat(40));
-  query = "Now tell me about the recent business developments.";
-  console.log("\nQuery 3: ", query);
-  const thirdResult = await run(researchManagerAgent, query, {
-    context: researchContext,
-    session,
-  });
-  console.log("\nAssistant:\n");
-  console.log(
-    typeof thirdResult.finalOutput === "string"
-      ? thirdResult.finalOutput.replace(/\\n/g, "\n")
-      : JSON.stringify(thirdResult.finalOutput, null, 2),
-  );
+        if (!input) continue;
+
+        if (question.toLowerCase() == "exit") {
+          console.log("\nGoodbye!");
+          break;
+        }
+
+        const result = await run(researchManagerAgent, input, {
+          context: researchContext,
+          session,
+        });
+
+        if (typeof result?.finalOutput == "string") {
+          console.log(
+            "\nAssistant:\n",
+            result.finalOutput.replace(/\\n/g, "\n"),
+          );
+        } else {
+          console.log(
+            "\nAssistant:\n",
+            JSON.stringify(result.finalOutput, null, 2),
+          );
+        }
+      } catch (err) {
+        if (err instanceof InputGuardrailTripwireTriggered) {
+          console.log(
+            "\nAssistant: I can help with financial and company research, " +
+              "market analysis, financial performance, and business developments.",
+          );
+
+          console.log();
+          continue;
+        }
+
+        console.log("Error while processing the request.\n", err);
+        console.log();
+      }
+    }
+  } finally {
+    rl.close();
+  }
 }
 
 main().catch((err) => console.log("ERR: ", err));
