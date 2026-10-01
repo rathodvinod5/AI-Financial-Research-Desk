@@ -3,6 +3,7 @@ import { financialAnalystAgent } from "./financial-analyst.js";
 import { marketAnalystAgent } from "./market-analyst.js";
 import { newAnalystAgent } from "./news-analyst.js";
 import { financialResearchInputGuardrail } from "../guradrails/research-input-guradrails.js";
+import { financialResearchOutputGuardrail } from "../guradrails/research-output-guardrail.js";
 
 const financialAnalystAgentAsTool = financialAnalystAgent.asTool({
   toolName: "financial_analysis",
@@ -49,9 +50,14 @@ export const researchManagerAgent = new Agent({
 
     Do not provide personalized investment advice.
   `,
+
   tools: [financialAnalystAgentAsTool, newsAnalystAgentAsTool],
+
   handoffs: [marketAnalystAgent],
+
   inputGuardrails: [financialResearchInputGuardrail],
+
+  outputGuardrails: [financialResearchOutputGuardrail],
 });
 
 researchManagerAgent.on("agent_start", (ctx, agent) => {

@@ -2,6 +2,7 @@ import "dotenv/config";
 import {
   Agent,
   InputGuardrailTripwireTriggered,
+  OutputGuardrailTripwireTriggered,
   MemorySession,
   run,
   Runner,
@@ -76,6 +77,16 @@ async function main() {
           console.log(
             "\nAssistant: I can help with financial and company research, " +
               "market analysis, financial performance, and business developments.",
+          );
+
+          console.log();
+          continue;
+        }
+
+        if (err instanceof OutputGuardrailTripwireTriggered) {
+          console.log(
+            "\nAssistant: I couldn't return that research response " +
+              "because it did not pass the final safety and quality checks.",
           );
 
           console.log();
