@@ -30,7 +30,7 @@ export const publishResearchReport = tool({
     logger.info(`Research ${researchId}: publishing report for ${company}`);
 
     return {
-      success: false,
+      success: true,
       company,
       report,
       destination,

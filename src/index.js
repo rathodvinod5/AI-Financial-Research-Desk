@@ -12,7 +12,7 @@ import { createResearchContext } from "./context/research-context.js";
 import { researchManagerAgent } from "./agents/research-manager.js";
 import { handlePublishApproval } from "./approvals/publish-approval.js";
 import constants from "./constants.js";
-import { toolErrorFormatter } from "./config/run-config.js";
+import { createRunConfig, toolErrorFormatter } from "./config/run-config.js";
 
 async function main() {
   const researchContext = createResearchContext({
@@ -50,12 +50,29 @@ async function main() {
           break;
         }
 
-        let result = await run(researchManagerAgent, input, {
-          context: researchContext,
-          session,
-          maxTurns: constants.MAX_TURNS,
-          toolErrorFormatter,
-        });
+        let result = await run(
+          researchManagerAgent,
+          input,
+          createRunConfig({
+            context: researchContext,
+            session,
+          }),
+          // {
+          // context: researchContext,
+          // session,
+          // maxTurns: constants.MAX_TURNS,
+
+          // // Tracing
+          // workflowName: "AI Financial Research Desk",
+          // groupId: researchContext.researchId,
+          // traceMetadata: {
+          //   researchId: researchContext.researchId,
+          //   company: researchContext.company,
+          //   userId: researchContext.userId,
+          // },
+          // toolErrorFormatter,
+          // }
+        );
 
         while (result.interruptions?.length) {
           result = await handlePublishApproval(

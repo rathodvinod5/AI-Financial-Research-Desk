@@ -2,7 +2,7 @@
 import { run, RunToolApprovalItem } from "@openai/agents";
 import { researchManagerAgent } from "../agents/research-manager.js";
 import constants from "../constants.js";
-import { toolErrorFormatter } from "../config/run-config.js";
+import { createRunConfig, toolErrorFormatter } from "../config/run-config.js";
 
 export async function handlePublishApproval(
   result,
@@ -34,10 +34,25 @@ export async function handlePublishApproval(
     }
   }
 
-  return await run(researchManagerAgent, result.state, {
-    context: researchContext,
-    session,
-    maxTurns: constants.MAX_TURNS,
-    toolErrorFormatter,
-  });
+  return await run(
+    researchManagerAgent,
+    result.state,
+    createRunConfig({
+      context: researchContext,
+      session,
+    }),
+    //     {
+    //     context: researchContext,
+    //     session,
+    //     maxTurns: constants.MAX_TURNS,
+    //     workflowName: "AI Financial Research Desk",
+    //     groupId: researchContext.researchId,
+    //     traceMetadata: {
+    //       researchId: researchContext.researchId,
+    //       company: researchContext.company,
+    //       userId: researchContext.userId,
+    //     },
+    //     toolErrorFormatter,
+    //   }
+  );
 }

@@ -1,10 +1,20 @@
 import constants from "../constants.js";
 
-export async function createRunConfig({ context, session }) {
+export function createRunConfig({ context, session }) {
+  /** @type {import("@openai/agents").RunConfig} */
   return {
     context,
     session,
     maxTurns: constants.MAX_TURNS,
+
+    // Tracing
+    workflowName: "AI Financial Research Desk",
+    groupId: context.researchId,
+    traceMetadata: {
+      researchId: context.researchId,
+      company: context.company,
+      userId: context.userId,
+    },
     toolErrorFormatter: ({
       kind,
       toolType,
@@ -12,6 +22,7 @@ export async function createRunConfig({ context, session }) {
       callId,
       defaultMessage,
     }) => {
+      /** @type {import("@openai/agents").RunConfig} */
       //   return [
       //     `Tool "${toolName}" failed.`,
       //     `Tool type: ${toolType}`,
