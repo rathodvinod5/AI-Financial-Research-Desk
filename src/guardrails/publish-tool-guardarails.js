@@ -31,7 +31,7 @@ export const publishToolInputGuardrail = defineToolInputGuardrail({
 export const publishToolOutputGuadrail = defineToolOutputGuardrail({
   name: "Publish tool ouput guardrail",
   run: async ({ output }) => {
-    console.log("\n🔥 Publish tool output guardrail CALLED 🔥");
+    console.log("\n🔥 Publish tool output guardrail CALLED 🔥:\n");
     // @ts-ignore
     if (!output?.success) {
       return ToolGuardrailFunctionOutputFactory.rejectContent(
