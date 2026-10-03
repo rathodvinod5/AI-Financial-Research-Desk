@@ -1,10 +1,16 @@
 import { tool } from "@openai/agents";
-import { success, z } from "zod";
+import { z } from "zod";
+import {
+  publishToolInputGuardrail,
+  publishToolOutputGuadrail,
+} from "../guardrails/publish-tool-guardarails.js";
 
 export const publishResearchReport = tool({
   name: "publish_research_report",
+
   description: `Publish a completed financial research workspace.
     This requires human approval`,
+
   parameters: z.object({
     company: z.string(),
     report: z.string().describe("The completed financial research report"),
@@ -13,7 +19,11 @@ export const publishResearchReport = tool({
       .default("research_workspace")
       .describe("Destination where the report should be published"),
   }),
+
   needsApproval: true,
+  inputGuardrails: [publishToolInputGuardrail],
+  outputGuardrails: [publishToolOutputGuadrail],
+
   execute: async ({ company, report, destination }, runContext) => {
     const { researchId, logger } = runContext.context;
 
