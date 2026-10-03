@@ -5,6 +5,7 @@ import {
   MemorySession,
   run,
   MaxTurnsExceededError,
+  withTrace,
 } from "@openai/agents";
 import readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
@@ -50,29 +51,16 @@ async function main() {
           break;
         }
 
-        let result = await run(
-          researchManagerAgent,
-          input,
-          createRunConfig({
-            context: researchContext,
-            session,
-          }),
-          // {
-          // context: researchContext,
-          // session,
-          // maxTurns: constants.MAX_TURNS,
-
-          // // Tracing
-          // workflowName: "AI Financial Research Desk",
-          // groupId: researchContext.researchId,
-          // traceMetadata: {
-          //   researchId: researchContext.researchId,
-          //   company: researchContext.company,
-          //   userId: researchContext.userId,
-          // },
-          // toolErrorFormatter,
-          // }
-        );
+        let result = await withTrace("AI Financial Research Desk", async () => {
+          return await run(
+            researchManagerAgent,
+            input,
+            createRunConfig({
+              context: researchContext,
+              session,
+            }),
+          );
+        });
 
         while (result.interruptions?.length) {
           result = await handlePublishApproval(

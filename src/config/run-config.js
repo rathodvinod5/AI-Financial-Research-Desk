@@ -22,7 +22,6 @@ export function createRunConfig({ context, session }) {
       callId,
       defaultMessage,
     }) => {
-      /** @type {import("@openai/agents").RunConfig} */
       //   return [
       //     `Tool "${toolName}" failed.`,
       //     `Tool type: ${toolType}`,
