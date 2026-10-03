@@ -1,6 +1,8 @@
 // @ts-nocheck
 import { run, RunToolApprovalItem } from "@openai/agents";
 import { researchManagerAgent } from "../agents/research-manager.js";
+import constants from "../constants.js";
+import { toolErrorFormatter } from "../config/run-config.js";
 
 export async function handlePublishApproval(
   result,
@@ -35,5 +37,7 @@ export async function handlePublishApproval(
   return await run(researchManagerAgent, result.state, {
     context: researchContext,
     session,
+    maxTurns: constants.MAX_TURNS,
+    toolErrorFormatter,
   });
 }

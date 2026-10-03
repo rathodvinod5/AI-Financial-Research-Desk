@@ -1,24 +1,18 @@
 import "dotenv/config";
 import {
-  Agent,
   InputGuardrailTripwireTriggered,
   OutputGuardrailTripwireTriggered,
   MemorySession,
   run,
+  MaxTurnsExceededError,
 } from "@openai/agents";
-import { z } from "zod";
 import readline from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import {
-  getCompanyFinancials,
-  getMarketData,
-} from "./tools/financial-tools.js";
 import { createResearchContext } from "./context/research-context.js";
-import { financialReserachOutput } from "./schemas/research-output.js";
-import { financialAnalystAgent } from "./agents/financial-analyst.js";
 import { researchManagerAgent } from "./agents/research-manager.js";
-import { MyRunHooks } from "./hooks/agent-listeners.js";
 import { handlePublishApproval } from "./approvals/publish-approval.js";
+import constants from "./constants.js";
+import { createRunConfig, toolErrorFormatter } from "./config/run-config.js";
 
 async function main() {
   const researchContext = createResearchContext({
@@ -59,6 +53,8 @@ async function main() {
         let result = await run(researchManagerAgent, input, {
           context: researchContext,
           session,
+          maxTurns: constants.MAX_TURNS,
+          toolErrorFormatter,
         });
 
         while (result.interruptions?.length) {
@@ -85,24 +81,28 @@ async function main() {
         if (err instanceof InputGuardrailTripwireTriggered) {
           console.log(
             "\nAssistant: I can help with financial and company research, " +
-              "market analysis, financial performance, and business developments.",
+              "market analysis, financial performance, and business developments.\n",
           );
-
-          console.log();
           continue;
         }
 
         if (err instanceof OutputGuardrailTripwireTriggered) {
           console.log(
             "\nAssistant: I couldn't return that research response " +
-              "because it did not pass the final safety and quality checks.",
+              "because it did not pass the final safety and quality checks.\n",
           );
-
-          console.log();
           continue;
         }
 
-        console.log("Error while processing the request.\n", err);
+        if (err instanceof MaxTurnsExceededError) {
+          console.log(
+            "\nAssistant: The research workflow reached its execution limit.",
+          );
+          console.log("Please try a more focused research request.\n");
+          continue;
+        }
+
+        console.log("Error while processing the request.\n", err.message);
         console.log();
       }
     }
