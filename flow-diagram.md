@@ -218,3 +218,32 @@
 │           • Error Handling • toolErrorFormatter             │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+```mermaid
+AI Financial Research Desk
+│
+└── Task
+    │
+    └── Research Manager
+        │
+        ├── Input Guardrail
+        │
+        ├── Financial Analyst
+        │   ├── LLM Generation
+        │   ├── get_company_financials
+        │   └── get_market_data
+        │
+        ├── News Analyst
+        │   ├── LLM Generation
+        │   └── get_company_news
+        │
+        ├── Handoff → Market Analyst
+        │   └── get_market_data
+        │
+        ├── publish_research_report
+        │   ├── Tool Input Guardrail
+        │   ├── Human Approval
+        │   └── Tool Output Guardrail
+        │
+        └── Output Guardrail
+```
