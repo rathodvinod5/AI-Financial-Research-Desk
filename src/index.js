@@ -5,7 +5,6 @@ import {
   OutputGuardrailTripwireTriggered,
   MemorySession,
   run,
-  Runner,
 } from "@openai/agents";
 import { z } from "zod";
 import readline from "node:readline/promises";
@@ -19,6 +18,7 @@ import { financialReserachOutput } from "./schemas/research-output.js";
 import { financialAnalystAgent } from "./agents/financial-analyst.js";
 import { researchManagerAgent } from "./agents/research-manager.js";
 import { MyRunHooks } from "./hooks/agent-listeners.js";
+import { handlePublishApproval } from "./approvals/publish-approval.js";
 
 async function main() {
   const researchContext = createResearchContext({
@@ -56,10 +56,19 @@ async function main() {
           break;
         }
 
-        const result = await run(researchManagerAgent, input, {
+        let result = await run(researchManagerAgent, input, {
           context: researchContext,
           session,
         });
+
+        while (result.interruptions?.length) {
+          result = await handlePublishApproval(
+            result,
+            rl,
+            researchContext,
+            session,
+          );
+        }
 
         if (typeof result?.finalOutput == "string") {
           console.log(

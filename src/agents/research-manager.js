@@ -4,6 +4,7 @@ import { marketAnalystAgent } from "./market-analyst.js";
 import { newAnalystAgent } from "./news-analyst.js";
 import { financialResearchInputGuardrail } from "../guradrails/research-input-guradrails.js";
 import { financialResearchOutputGuardrail } from "../guradrails/research-output-guardrail.js";
+import { publishResearchReport } from "../tools/report-tools.js";
 
 const financialAnalystAgentAsTool = financialAnalystAgent.asTool({
   toolName: "financial_analysis",
@@ -43,15 +44,29 @@ export const researchManagerAgent = new Agent({
     market information or market movements, hand off to the
     Market Analyst.
 
+    Use publish_research_report when:
+    - the user explicitly asks to publish or save the completed research
+    - the research report has already been completed
+    - the report is ready to be shared
+
+    Never publish a report automatically.
+    The publishing tool requires human approval.
+
     You remain responsible for the final response when using
     specialist agents as tools.
 
     Never invent information.
 
     Do not provide personalized investment advice.
+
+    Clearly distinguish retrieved facts from your analysis.
   `,
 
-  tools: [financialAnalystAgentAsTool, newsAnalystAgentAsTool],
+  tools: [
+    financialAnalystAgentAsTool,
+    newsAnalystAgentAsTool,
+    publishResearchReport,
+  ],
 
   handoffs: [marketAnalystAgent],
 
