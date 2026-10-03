@@ -12,7 +12,7 @@ import { createResearchContext } from "./context/research-context.js";
 import { researchManagerAgent } from "./agents/research-manager.js";
 import { handlePublishApproval } from "./approvals/publish-approval.js";
 import constants from "./constants.js";
-import { createRunConfig, toolErrorFormatter } from "./config/run-config.js";
+import { toolErrorFormatter } from "./config/run-config.js";
 
 async function main() {
   const researchContext = createResearchContext({

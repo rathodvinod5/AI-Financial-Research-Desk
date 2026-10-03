@@ -2,8 +2,8 @@ import { Agent } from "@openai/agents";
 import { financialAnalystAgent } from "./financial-analyst.js";
 import { marketAnalystAgent } from "./market-analyst.js";
 import { newAnalystAgent } from "./news-analyst.js";
-import { financialResearchInputGuardrail } from "../guradrails/research-input-guradrails.js";
-import { financialResearchOutputGuardrail } from "../guradrails/research-output-guardrail.js";
+import { financialResearchInputGuardrail } from "../guardrails/research-input-guradrails.js";
+import { financialResearchOutputGuardrail } from "../guardrails/research-output-guardrail.js";
 import { publishResearchReport } from "../tools/report-tools.js";
 
 const financialAnalystAgentAsTool = financialAnalystAgent.asTool({
