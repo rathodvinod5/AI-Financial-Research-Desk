@@ -4,6 +4,7 @@ import { createResearchContext } from "../context/research-context.js";
 import { evaluationCases } from "./cases.js";
 import { researchManagerAgent } from "../agents/research-manager.js";
 import { createRunConfig } from "../config/run-config.js";
+import { evaluateResult } from "./evaluate-result.js";
 
 async function runEvaluation(testCase) {
   try {
@@ -21,18 +22,22 @@ async function runEvaluation(testCase) {
       }),
     );
 
+    const evaluationResult = await evaluateResult(testCase, result.finalOutput);
+
     return {
       id: testCase.id,
       input: testCase.input,
       output: result.finalOutput,
-      passed: true,
+      executionPassed: true,
+      evaluation: evaluationResult,
     };
   } catch (err) {
     return {
       id: testCase.id,
       input: testCase.input,
       output: null,
-      passed: false,
+      executionPassed: false,
+      evaluation: null,
       error: err.message,
     };
   }
@@ -44,20 +49,33 @@ async function main() {
   for (const testCase of evaluationCases) {
     const result = await runEvaluation(testCase);
 
-    if (result.passed) {
-      console.log("\nID: ", testCase.id);
-      console.log("--------------------------------");
-      console.log("Input: ", testCase.input);
-      console.log("Status: PASSED");
-      console.log("Result: ", result.output);
-    } else {
-      console.log("\nID: ", testCase.id);
-      console.log("--------------------------------");
-      console.log("Input: ", testCase.input);
-      console.log("Status: FAILED");
-      console.log("Error: ", result.error);
+    console.log(`\n${result.id}`);
+    console.log("--------------------------------");
+
+    console.log(`Input: ${result.input}`);
+
+    if (!result.executionPassed) {
+      console.log("Execution: FAIL");
+      console.log(`Error: ${result.error}`);
+      continue;
     }
+
+    console.log("Execution: PASS");
+
+    console.log(`Evaluation: ${result.evaluation.passed ? "PASS" : "FAIL"}`);
+
+    console.log(`Score: ${result.evaluation.score}/10`);
+
+    console.log("\nCriteria:");
+
+    for (const criterion of result.evaluation.criteriaResults) {
+      console.log(`${criterion.passed ? "✓" : "✗"} ${criterion.criterion}`);
+
+      console.log(`  ${criterion.reasoning}`);
+    }
+
+    console.log(`\nOverall: ${result.evaluation.overallReasoning}`);
   }
 }
 
-main().catch((err) => console.log("ERR: ", err));
+main().catch(console.error);

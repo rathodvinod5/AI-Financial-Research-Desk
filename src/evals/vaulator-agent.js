@@ -1,7 +1,7 @@
 import { Agent } from "@openai/agents";
 import { z } from "zod";
 
-const evaluationOutputType = {
+const evaluationOutputType = z.object({
   passed: z.boolean(),
   score: z.number().min(0).max(10),
   criteriaResults: z.array(
@@ -12,7 +12,7 @@ const evaluationOutputType = {
     }),
   ),
   overallReasoning: z.string(),
-};
+});
 
 export const evaluationAgent = new Agent({
   name: "Research Quality Evaluator",
