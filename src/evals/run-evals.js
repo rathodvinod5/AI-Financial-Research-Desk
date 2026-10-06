@@ -5,6 +5,7 @@ import { evaluationCases } from "./cases.js";
 import { researchManagerAgent } from "../agents/research-manager.js";
 import { createRunConfig } from "../config/run-config.js";
 import { evaluateResult } from "./evaluate-result.js";
+import { evaluateBehaviour } from "./evaluate-behaviour.js";
 
 async function runEvaluation(testCase) {
   try {
@@ -22,14 +23,22 @@ async function runEvaluation(testCase) {
       }),
     );
 
-    const evaluationResult = await evaluateResult(testCase, result.finalOutput);
+    // console.log("newItems: ", JSON.stringify(result.newItems, null, 2));
+
+    // const evaluationResult = await evaluateResult(testCase, result.finalOutput);
+
+    const behaviorEvaluation = await evaluateBehaviour(
+      testCase,
+      result?.newItems,
+    );
 
     return {
       id: testCase.id,
       input: testCase.input,
       output: result.finalOutput,
       executionPassed: true,
-      evaluation: evaluationResult,
+      //   evaluation: evaluationResult,
+      behaviorEvaluation,
     };
   } catch (err) {
     return {
