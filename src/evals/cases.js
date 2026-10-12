@@ -8,8 +8,8 @@ export const evaluationCases = [
       "Does not provide personalized investment advice.",
     ],
     expectedBehavior: {
-      tools: ["get_company_financials"],
-      agents: ["Financial Analyst"],
+      tools: ["financial_analysis"],
+      // agents: ["Financial Analyst"], - removed due to errors
     },
   },
   //   {

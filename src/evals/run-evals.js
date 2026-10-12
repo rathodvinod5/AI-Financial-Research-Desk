@@ -58,32 +58,47 @@ async function main() {
   for (const testCase of evaluationCases) {
     const result = await runEvaluation(testCase);
 
-    console.log(`\n${result.id}`);
-    console.log("--------------------------------");
+    // Flow to evaluate result
+    // console.log(`\n${result.id}`);
+    // console.log("--------------------------------");
+    // console.log(`Input: ${result.input}`);
+    // if (!result.executionPassed) {
+    //   console.log("Execution: FAIL");
+    //   console.log(`Error: ${result.error}`);
+    //   continue;
+    // }
+    // console.log("Execution: PASS");
+    // console.log(`Evaluation: ${result.evaluation.passed ? "PASS" : "FAIL"}`);
+    // console.log(`Score: ${result.evaluation.score}/10`);
+    // console.log("\nCriteria:");
+    // for (const criterion of result.evaluation.criteriaResults) {
+    //   console.log(`${criterion.passed ? "✓" : "✗"} ${criterion.criterion}`);
+    //   console.log(`  ${criterion.reasoning}`);
+    // }
+    // console.log(`\nOverall: ${result.evaluation.overallReasoning}`);
 
-    console.log(`Input: ${result.input}`);
-
-    if (!result.executionPassed) {
-      console.log("Execution: FAIL");
-      console.log(`Error: ${result.error}`);
-      continue;
+    // FLow to evaluate path(tool call and agent call)
+    console.log(
+      `Behavior: ${result.behaviorEvaluation.passed ? "PASS" : "FAIL"}`,
+    );
+    console.log("\nBehavior checks:");
+    for (const check of result.behaviorEvaluation.checks) {
+      console.log(`${check.passed ? "✓" : "✗"} ${check.type}: ${check.name}`);
     }
-
-    console.log("Execution: PASS");
-
-    console.log(`Evaluation: ${result.evaluation.passed ? "PASS" : "FAIL"}`);
-
-    console.log(`Score: ${result.evaluation.score}/10`);
-
-    console.log("\nCriteria:");
-
-    for (const criterion of result.evaluation.criteriaResults) {
-      console.log(`${criterion.passed ? "✓" : "✗"} ${criterion.criterion}`);
-
-      console.log(`  ${criterion.reasoning}`);
-    }
-
-    console.log(`\nOverall: ${result.evaluation.overallReasoning}`);
+    console.log(
+      "tools: ",
+      JSON.stringify(result?.behaviorEvaluation?.actualTools, null, 2),
+    );
+    // console.log(
+    //   `\nActual tools: ${
+    //     result.behaviorEvaluation.actualTools.join(", ") || "None"
+    //   }`,
+    // );
+    // console.log(
+    //   `Actual agents: ${
+    //     result.behaviorEvaluation.actualAgents.join(", ") || "None"
+    //   }`,
+    // );
   }
 }
 
