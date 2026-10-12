@@ -5,7 +5,7 @@ import { evaluationCases } from "./cases.js";
 import { researchManagerAgent } from "../agents/research-manager.js";
 import { createRunConfig } from "../config/run-config.js";
 import { evaluateResult } from "./evaluate-result.js";
-import { evaluateBehaviour } from "./evaluate-behaviour.js";
+import { evaluateBehavior } from "./evaluate-behaviour.js";
 
 async function runEvaluation(testCase) {
   try {
@@ -25,19 +25,40 @@ async function runEvaluation(testCase) {
 
     // console.log("newItems: ", JSON.stringify(result.newItems, null, 2));
 
+    // ============================= EVALUATE RESULT ===========================
     // const evaluationResult = await evaluateResult(testCase, result.finalOutput);
+    // return {
+    //   id: testCase.id,
+    //   input: testCase.input,
+    //   output: result.finalOutput,
+    //   executionPassed: true,
+    //   evaluation: evaluationResult,
+    // };
 
-    const behaviorEvaluation = await evaluateBehaviour(
+    // ============================= EVALUATE PATH =============================
+    // console.log(
+    //   "Run item types:",
+    //   result.newItems?.map((item) => ({
+    //     type: item.type,
+    //     toolName: item.rawItem,
+    //   })),
+    // );
+
+    const behaviorEvaluation = await evaluateBehavior({
       testCase,
-      result?.newItems,
-    );
+      result,
+    });
+
+    // console.log(
+    //   "Behavior evaluation:",
+    //   JSON.stringify(behaviorEvaluation, null, 2),
+    // );
 
     return {
       id: testCase.id,
       input: testCase.input,
       output: result.finalOutput,
       executionPassed: true,
-      //   evaluation: evaluationResult,
       behaviorEvaluation,
     };
   } catch (err) {
@@ -58,7 +79,8 @@ async function main() {
   for (const testCase of evaluationCases) {
     const result = await runEvaluation(testCase);
 
-    // Flow to evaluate result
+    // ======================== FLOW TO EVALUATE RESULT =================================
+    // console.log("Evaluate Result");
     // console.log(`\n${result.id}`);
     // console.log("--------------------------------");
     // console.log(`Input: ${result.input}`);
@@ -77,11 +99,11 @@ async function main() {
     // }
     // console.log(`\nOverall: ${result.evaluation.overallReasoning}`);
 
-    // FLow to evaluate path(tool call and agent call)
+    // ================ FLOW TO EVALUATE PATH(tool call and agent call) =================
     console.log(
       `Behavior: ${result.behaviorEvaluation.passed ? "PASS" : "FAIL"}`,
     );
-    console.log("\nBehavior checks:");
+    console.log("\nBehavior checks: ", result?.behaviorEvaluation);
     for (const check of result.behaviorEvaluation.checks) {
       console.log(`${check.passed ? "✓" : "✗"} ${check.type}: ${check.name}`);
     }
@@ -89,16 +111,17 @@ async function main() {
       "tools: ",
       JSON.stringify(result?.behaviorEvaluation?.actualTools, null, 2),
     );
-    // console.log(
-    //   `\nActual tools: ${
-    //     result.behaviorEvaluation.actualTools.join(", ") || "None"
-    //   }`,
-    // );
-    // console.log(
-    //   `Actual agents: ${
-    //     result.behaviorEvaluation.actualAgents.join(", ") || "None"
-    //   }`,
-    // );
+
+    console.log(
+      `\nActual tools: ${
+        result.behaviorEvaluation?.actualTools.join(", ") || "None"
+      }`,
+    );
+    console.log(
+      `Actual agents: ${
+        result.behaviorEvaluation?.actualAgents.join(", ") || "None"
+      }`,
+    );
   }
 }
 

@@ -9,7 +9,7 @@ export const evaluationCases = [
     ],
     expectedBehavior: {
       tools: ["financial_analysis"],
-      // agents: ["Financial Analyst"], - removed due to errors
+      // agents: ["Financial Analyst"], - remove for evaluateBehaviour
     },
   },
   //   {
