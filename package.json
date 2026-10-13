@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js",
-    "eval": "node src/evals/run-evals.js"
+    "eval": "node src/evals/run-evals.js",
+    "test:financial-analyst": "node --test src/evals/financial-analyst.test.js"
   },
   "keywords": [],
   "author": "",
