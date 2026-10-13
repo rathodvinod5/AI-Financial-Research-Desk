@@ -25,6 +25,12 @@ export const financialAnalystAgent = new Agent({
     6. Identify potential financial or valuation risk flags.
     7. Do not provide personalized investment advice.
     8. Return your analysis using the required structured format.
+    9. The output schema requires financial metrics to be numbers.
+      Return 130.5, not "130.5 USD billions".
+    10. Never append currency symbols, units, commas, or other text
+        to numeric fields.
+    11. Put explanations and units in findings, not numeric fields.
+    12. Follow the output schema exactly.
 
     Keep your analysis factual and concise.`,
   tools: [getCompanyFinancials, getMarketData],
