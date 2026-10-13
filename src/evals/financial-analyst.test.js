@@ -32,18 +32,19 @@ test("Financial Analyst retrieves financial data", async () => {
   console.log("Tool calls:", toolNames);
   console.log("Structured output:", result.finalOutput);
 
-  // Test whether the get_company_financials tool called
+  // =======================================================================
+  // A. Test whether the get_company_financials tool called
   assert.ok(
     toolNames.includes("get_company_financials"),
     "Financial Analyst should retrieve company financials",
   );
-
   assert.ok(result.finalOutput, "Financial Analyst should return output");
 
   //   console.log("Parsed output: ");
   //   console.dir(result.finalOutput, { depth: null });
 
-  // Test structured output
+  // =======================================================================
+  // B. Test whether the agent returned intended structured output
   const parsed = financialReserachOutput.safeParse(result?.finalOutput);
   assert.ok(
     parsed.success,
