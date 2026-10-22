@@ -8,7 +8,8 @@
     "start": "node src/index.js",
     "eval": "node src/evals/run-evals.js",
     "test:financial-analyst": "node --test src/evals/financial-analyst.test.js",
-    "test:financial-analyst-missing-data": "node --test src/evals/financial-analyst-missing-data.test.js"
+    "test:financial-analyst-missing-data": "node --test src/evals/financial-analyst-missing-data.test.js",
+    "test:financial-analyst:deterministic": "node --test src/evals/financial-analyst.deterministic.test.js"
   },
   "keywords": [],
   "author": "",
