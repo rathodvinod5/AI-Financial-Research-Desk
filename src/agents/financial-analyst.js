@@ -3,7 +3,7 @@ import {
   getCompanyFinancials,
   getMarketData,
 } from "../tools/financial-tools.js";
-import { financialReserachOutput } from "../schemas/research-output.js";
+import { financialResearchOutput } from "../schemas/research-output.js";
 
 export const financialAnalystAgent = new Agent({
   name: "Financial Analyst",
@@ -25,14 +25,19 @@ export const financialAnalystAgent = new Agent({
     6. Identify potential financial or valuation risk flags.
     7. Do not provide personalized investment advice.
     8. Return your analysis using the required structured format.
-    9. The output schema requires financial metrics to be numbers.
-      Return 130.5, not "130.5 USD billions".
-    10. Never append currency symbols, units, commas, or other text
-        to numeric fields.
-    11. Put explanations and units in findings, not numeric fields.
-    12. Follow the output schema exactly.
+    9. Always return every field required by the output schema.
+    10. If financial data is unavailable, set dataAvailable to false.
+    11. When data is unavailable, set financialYear and
+        financialSummary to null. Set marketSummary to null
+        if market data is also unavailable.
+    12. Explain missing financial data in dataUnavailableReason.
+    13. Never invent metrics to fill unavailable fields.
+    14. Use riskFlags, not riskFlag.
+    15. When financial data is available, set dataAvailable to true
+        and provide numeric metrics.
+    16. Set dataUnavailableReason to null when data is available.
 
     Keep your analysis factual and concise.`,
   tools: [getCompanyFinancials, getMarketData],
-  outputType: financialReserachOutput,
+  outputType: financialResearchOutput,
 });
