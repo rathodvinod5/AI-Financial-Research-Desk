@@ -12,6 +12,7 @@ import {
   getMarketData,
 } from "../tools/financial-tools.js";
 import { financialResearchOutput } from "../schemas/research-output.js";
+import { financialAnalystAgent } from "../agents/financial-analyst.js";
 
 test("Financial Analyst executes tools and returns structured data", async () => {
   const model = new ScriptedModel([
@@ -53,35 +54,30 @@ test("Financial Analyst executes tools and returns structured data", async () =>
             dailyChangePercent: 1.84,
           },
           dataUnavailableReason: null,
-          findings: ["Revenue increased significantly year over year."],
+          findings: ["NVIDIA reported strong revenue growth."],
           riskFlags: [],
         }),
       ),
     ],
   ]);
 
-  const agent = new Agent({
-    name: "Financial Analyst - Deterministic Test",
-    instructions: `
-      Analyze financial data using the available tools.
-      Use both tools when relevant.
-      Return all fields required by the supplied output schema.
-      Do not invent data outside the tool results.
-    `,
-    model,
-    tools: [getCompanyFinancials, getMarketData],
-    outputType: financialResearchOutput,
-  });
-
-  const runner = new Runner({ tracingDisabled: true });
-
   // Ensure scripted steps are checked even if an assertion fails.
   test.after(() => model.assertComplete());
 
-  const result = await runner.run(
-    agent,
-    "Analyze NVIDIA's FY2025 financial performance and current market data.",
-  );
+  const runner = new Runner({
+    model,
+    tracingDisabled: true,
+  });
+
+  const result = await runner.run(financialAnalystAgent, "", {
+    context: {
+      researchId: "deterministic-test-001",
+      userId: "test-user",
+      logger: {
+        info() {},
+      },
+    },
+  });
 
   assert.equal(model.calls.length, 3);
 

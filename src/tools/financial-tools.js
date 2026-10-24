@@ -54,6 +54,16 @@ export const getCompanyFinancials = tool({
       };
     }
 
+    if (!companyYearData) {
+      return {
+        company,
+        year,
+        found: false,
+        message:
+          "Financial data not available for the requested company and year.",
+      };
+    }
+
     return {
       company,
       year,
