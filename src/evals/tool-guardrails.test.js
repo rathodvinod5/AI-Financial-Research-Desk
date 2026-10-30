@@ -37,3 +37,17 @@ test("allows a successful publishing result", async () => {
 
   assert.equal(result.behavior.type, "allow");
 });
+
+test("rejects an unsuccessful publishing resul", async () => {
+  const result = await publishToolOutputGuadrail.run({
+    output: {
+      success: false,
+      error: "Publishing failed",
+    },
+    context: undefined,
+    agent: undefined,
+    toolCall: undefined,
+  });
+
+  assert.equal(result.behavior.type, "rejectContent");
+});
