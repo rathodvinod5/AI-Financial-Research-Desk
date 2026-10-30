@@ -6,7 +6,7 @@ import {
   publishToolOutputGuadrail,
 } from "../guardrails/publish-tool-guardarails.js";
 
-test("Allows publishing to research workspace", async () => {
+test("allows publishing to research workspace", async () => {
   const result = await publishToolInputGuardrail.run({
     toolCall: {
       type: "function_call",
@@ -40,6 +40,22 @@ test("rejects publishing to an unauthorized destination", async () => {
   });
 
   assert.equal(result.behavior.type, "rejectContent");
+});
+
+test("rejects an empty research report", async () => {
+  const result = await publishToolInputGuardrail.run({
+    toolCall: {
+      arguments: JSON.stringify({
+        destination: "research-workspace",
+        report: "",
+      }),
+      type: "function_call",
+      callId: "call_publish_001",
+      name: "publish_research_report",
+    },
+    context: undefined,
+    agent: undefined,
+  });
 });
 
 test("rejects a whitespace-only research report", async () => {
