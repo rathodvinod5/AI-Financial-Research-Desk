@@ -24,6 +24,22 @@ test("Allows publishing to research workspace", async () => {
   assert.equal(result.behavior.type, "allow");
 });
 
+test("rejects publishing to an unauthorized destination", async () => {
+  const result = await publishToolInputGuardrail.run({
+    toolCall: {
+      arguments: JSON.stringify({
+        destination: "external-workspace",
+        report: "NVIDIA financial research report",
+      }),
+      type: "function_call",
+      callId: "call_publish_001",
+      name: "publish_research_report",
+    },
+    context: undefined,
+    agent: undefined,
+  });
+});
+
 test("allows a successful publishing result", async () => {
   const result = await publishToolOutputGuadrail.run({
     output: {
@@ -38,7 +54,7 @@ test("allows a successful publishing result", async () => {
   assert.equal(result.behavior.type, "allow");
 });
 
-test("rejects an unsuccessful publishing resul", async () => {
+test("rejects an unsuccessful publishing result", async () => {
   const result = await publishToolOutputGuadrail.run({
     output: {
       success: false,
