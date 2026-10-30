@@ -38,6 +38,26 @@ test("rejects publishing to an unauthorized destination", async () => {
     context: undefined,
     agent: undefined,
   });
+
+  assert.equal(result.behavior.type, "rejectContent");
+});
+
+test("rejects a whitespace-only research report", async () => {
+  const result = await publishToolInputGuardrail.run({
+    toolCall: {
+      arguments: JSON.stringify({
+        destination: "research-workspace",
+        report: "   ",
+      }),
+      type: "function_call",
+      callId: "call_publish_001",
+      name: "publish_research_report",
+    },
+    context: undefined,
+    agent: undefined,
+  });
+
+  assert.equal(result.behavior.type, "rejectContent");
 });
 
 test("allows a successful publishing result", async () => {
