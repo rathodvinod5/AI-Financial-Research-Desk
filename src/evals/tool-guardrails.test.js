@@ -23,3 +23,17 @@ test("Allows publishing to research workspace", async () => {
 
   assert.equal(result.behavior.type, "allow");
 });
+
+test("allows a successful publishing result", async () => {
+  const result = await publishToolOutputGuadrail.run({
+    output: {
+      success: true,
+      reportId: "report-123",
+    },
+    context: undefined,
+    agent: undefined,
+    toolCall: undefined,
+  });
+
+  assert.equal(result.behavior.type, "allow");
+});
