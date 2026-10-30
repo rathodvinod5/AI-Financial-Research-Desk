@@ -8,7 +8,16 @@ export const publishToolInputGuardrail = defineToolInputGuardrail({
   name: "Publish tool input guardrail",
   run: async ({ toolCall }) => {
     console.log("\n🔥 Publish tool input guardrail CALLED 🔥");
-    const args = JSON.parse(toolCall?.arguments);
+    // const args = JSON.parse(toolCall?.arguments);
+
+    let args;
+    try {
+      args = JSON.parse(toolCall?.arguments ?? "{}");
+    } catch {
+      return ToolGuardrailFunctionOutputFactory.rejectContent(
+        "Invalid publishing arguments.",
+      );
+    }
 
     const allowedDestinations = ["research-workspace"];
 
