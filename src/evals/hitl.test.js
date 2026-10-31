@@ -69,3 +69,68 @@ test("publishing pauses and requests human approval", async () => {
   assert.equal(model.calls.length, 1);
   model.assertComplete();
 });
+
+test("approving publishing executes the tool and resumes the workflow", async () => {
+  const model = new ScriptedModel([
+    // First model response: request publishing.
+    [
+      functionCall(
+        "",
+        {
+          name: "NVIDIA",
+          report: "NVIDIA FY2025 financial research report",
+          destination: "research_workspace",
+        },
+        {
+          callId: "call_publish_002",
+        },
+      ),
+    ],
+
+    // Second model response: respond after publishing succeeds.
+    [
+      assistantMessage(
+        "The NVIDIA financial research report was successfully published",
+      ),
+    ],
+  ]);
+
+  const runner = new Runner({
+    model,
+    tracingDisabled: true,
+  });
+
+  const publishingAgent = createPublishingAgent();
+  const testContext = createTestContext();
+
+  // Step 1: Start the workflow.
+  const initialResult = await runner.run(
+    publishingAgent,
+    "Publish the NVIDIA financial research report.",
+    { context: testContext },
+  );
+
+  assert.equal(initialResult.interruptions.length, 1);
+
+  // Step 2: Retrieve the pending approval.
+  const interruption = initialResult.interruptions[0];
+
+  // Step 3: Approve the pending tool call.
+  initialResult.state.approve(interruption);
+
+  // Step 4: Resume the interrupted workflow.
+  const resumedResult = await runner.run(publishingAgent, initialResult.state, {
+    context: testContext,
+  });
+
+  assert.equal(resumedResult.interruptions.length, 0);
+  assert.equal(
+    resumedResult.finalOutput,
+    "The NVIDIA financial research report was successfully published.",
+  );
+
+  // Initial request + resumed request.
+  assert.equal(model.calls.length, 2);
+
+  model.assertComplete();
+});
