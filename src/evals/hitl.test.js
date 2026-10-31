@@ -11,14 +11,31 @@ import {
 import { publishResearchReport } from "../tools/report-tools.js";
 
 function createTestContext() {
-  return {
+  //   return {
+  //     researchId: "hitl-test-001",
+  //     userId: "test-user",
+  //     company: "NVIDIA",
+  //     logger: {
+  //       info() {},
+  //     },
+  //   };
+
+  const tracker = {
+    publishExecutions: 0,
+  };
+
+  const context = {
     researchId: "hitl-test-001",
     userId: "test-user",
     company: "NVIDIA",
     logger: {
-      info() {},
+      info() {
+        tracker.publishExecutions++;
+      },
     },
   };
+
+  return { context, tracker };
 }
 
 function createPublishingAgent() {
@@ -54,7 +71,7 @@ test("publishing pauses and requests human approval", async () => {
   });
 
   const publishingAgent = createPublishingAgent();
-  const testContext = createTestContext();
+  const { context: testContext, tracker } = createTestContext();
 
   const result = await runner.run(
     publishingAgent,
@@ -63,6 +80,7 @@ test("publishing pauses and requests human approval", async () => {
   );
 
   assert.equal(result.interruptions.length, 1);
+  assert.equal(tracker.publishExecutions, 0);
 
   const interruption = result.interruptions[0];
   assert.equal(interruption.name, "publish_research_report");
@@ -72,25 +90,20 @@ test("publishing pauses and requests human approval", async () => {
 
 test("approving publishing executes the tool and resumes the workflow", async () => {
   const model = new ScriptedModel([
-    // First model response: request publishing.
     [
       functionCall(
-        "",
+        "publish_research_report",
         {
-          name: "NVIDIA",
+          company: "NVIDIA",
           report: "NVIDIA FY2025 financial research report",
           destination: "research_workspace",
         },
-        {
-          callId: "call_publish_002",
-        },
+        { callId: "call_publish_002" },
       ),
     ],
-
-    // Second model response: respond after publishing succeeds.
     [
       assistantMessage(
-        "The NVIDIA financial research report was successfully published",
+        "The NVIDIA financial research report was successfully published.",
       ),
     ],
   ]);
@@ -101,7 +114,7 @@ test("approving publishing executes the tool and resumes the workflow", async ()
   });
 
   const publishingAgent = createPublishingAgent();
-  const testContext = createTestContext();
+  const { context: testContext, tracker } = createTestContext();
 
   // Step 1: Start the workflow.
   const initialResult = await runner.run(
@@ -118,12 +131,25 @@ test("approving publishing executes the tool and resumes the workflow", async ()
   // Step 3: Approve the pending tool call.
   initialResult.state.approve(interruption);
 
-  // Step 4: Resume the interrupted workflow.
   const resumedResult = await runner.run(publishingAgent, initialResult.state, {
     context: testContext,
   });
 
+  //   console.dir(
+  //     {
+  //       finalOutput: resumedResult.finalOutput,
+  //       interruptions: resumedResult.interruptions?.map((item) => ({
+  //         name: item.name,
+  //         arguments: item.arguments,
+  //       })),
+  //       modelCallCount: model.calls.length,
+  //     },
+  //     { depth: null },
+  //   );
+
   assert.equal(resumedResult.interruptions.length, 0);
+  assert.equal(tracker.publishExecutions, 1);
+
   assert.equal(
     resumedResult.finalOutput,
     "The NVIDIA financial research report was successfully published.",
