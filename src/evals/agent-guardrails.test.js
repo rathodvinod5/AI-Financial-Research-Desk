@@ -42,3 +42,15 @@ test("allows a factual financial research report", async () => {
   assert.equal(result.tripwireTriggered, false);
   assert.equal(result.outputInfo.isValid, true);
 });
+
+test("rejects a report containing direct investment advice", async () => {
+  const result = await financialResearchOutputGuardrail.execute({
+    agentOutput: `NVIDIA is an excellent investment.
+      You should buy NVIDIA shares immediately.
+      This stock is guaranteed to increase in value.`,
+    context: {},
+  });
+
+  assert.equal(result.tripwireTriggered, true);
+  assert.equal(result.outputInfo.isValid, false);
+});
