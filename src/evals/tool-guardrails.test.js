@@ -13,7 +13,7 @@ test("allows publishing to research workspace", async () => {
       callId: "call_publish_001",
       name: "publish_research_report",
       arguments: JSON.stringify({
-        destination: "research-workspace",
+        destination: "research_workspace",
         report: "NVIDIA financial research report",
       }),
     },
@@ -46,7 +46,7 @@ test("rejects an empty research report", async () => {
   const result = await publishToolInputGuardrail.run({
     toolCall: {
       arguments: JSON.stringify({
-        destination: "research-workspace",
+        destination: "research_workspace",
         report: "",
       }),
       type: "function_call",
@@ -62,7 +62,7 @@ test("rejects a whitespace-only research report", async () => {
   const result = await publishToolInputGuardrail.run({
     toolCall: {
       arguments: JSON.stringify({
-        destination: "research-workspace",
+        destination: "research_workspace",
         report: "   ",
       }),
       type: "function_call",
