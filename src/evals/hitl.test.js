@@ -160,3 +160,65 @@ test("approving publishing executes the tool and resumes the workflow", async ()
 
   model.assertComplete();
 });
+
+test("rejecting publishing prevents tool execution", async () => {
+  const model = new ScriptedModel([
+    // Request publishing.
+    [
+      functionCall(
+        "publish_research_report",
+        {
+          company: "NVIDIA",
+          report: "NVIDIA FY2025 financial research report",
+          destination: "research_workspace",
+        },
+        {
+          callId: "call_publish_003",
+        },
+      ),
+    ],
+
+    // Respond after receiving the rejection.
+    [
+      assistantMessage(
+        "The publishing request was rejected. The report was not published.",
+      ),
+    ],
+  ]);
+
+  const runner = new Runner({
+    model,
+    tracingDisabled: true,
+  });
+
+  const publishingAgent = createPublishingAgent();
+  const { context: testContext, tracker } = createTestContext();
+
+  const initialResult = await runner.run(
+    publishingAgent,
+    "Publish the NVIDIA financial research report.",
+    { context: testContext },
+  );
+
+  assert.equal(initialResult.interruptions.length, 1);
+
+  const interruption = initialResult.interruptions[0];
+  initialResult.state.reject(interruption);
+
+  // Step 3: Resume workflow.
+  const resumedResult = await runner.run(publishingAgent, initialResult.state, {
+    context: testContext,
+  });
+
+  // Step 4: Verify publishing never executed.
+  assert.equal(tracker.publishExecutions, 0);
+
+  assert.equal(resumedResult.interruptions.length, 0);
+
+  assert.equal(
+    resumedResult.finalOutput,
+    "The publishing request was rejected. The report was not published.",
+  );
+
+  model.assertComplete();
+});
