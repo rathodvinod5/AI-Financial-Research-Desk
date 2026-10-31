@@ -29,7 +29,7 @@ export async function handlePublishApproval(
       console.log("Action approved");
       result.state.approve(interruption);
     } else {
-      console.log("Rejected approved");
+      console.log("Action rejected");
       result.state.reject(interruption);
     }
   }
