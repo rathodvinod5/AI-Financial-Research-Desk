@@ -2,6 +2,7 @@ import assert from "node:assert";
 import test from "node:test";
 
 import { financialResearchInputGuardrail } from "../guardrails/research-input-guradrails.js";
+import { financialResearchOutputGuardrail } from "../guardrails/research-output-guardrail.js";
 
 // INPUT GUARDRAIL TESTS
 test("allows financial research request", async () => {
@@ -23,4 +24,21 @@ test("rejects an unrelated request other than research", async () => {
 
   assert.equal(result.tripwireTriggered, true);
   assert.equal(result.outputInfo.isFinancialResearch, false);
+});
+
+// OUTPUT GUARDRAIL TESTS
+test("allows a factual financial research report", async () => {
+  const result = await financialResearchOutputGuardrail.execute({
+    agentOutput: `
+      NVIDIA reported revenue of $130.5 billion for FY2025,
+      representing 114% revenue growth.
+      Its gross margin was 75% and operating margin was 61.6%.
+      These figures indicate strong financial performance.
+      This report is for informational and research purposes only.
+      `,
+    context: {},
+  });
+
+  assert.equal(result.tripwireTriggered, false);
+  assert.equal(result.outputInfo.isValid, true);
 });
