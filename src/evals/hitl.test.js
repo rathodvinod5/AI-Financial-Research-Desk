@@ -160,3 +160,201 @@ test("approving publishing executes the tool and resumes the workflow", async ()
 
   model.assertComplete();
 });
+
+test("rejecting publishing prevents tool execution", async () => {
+  const model = new ScriptedModel([
+    // Request publishing.
+    [
+      functionCall(
+        "publish_research_report",
+        {
+          company: "NVIDIA",
+          report: "NVIDIA FY2025 financial research report",
+          destination: "research_workspace",
+        },
+        {
+          callId: "call_publish_003",
+        },
+      ),
+    ],
+
+    // Respond after receiving the rejection.
+    [
+      assistantMessage(
+        "The publishing request was rejected. The report was not published.",
+      ),
+    ],
+  ]);
+
+  const runner = new Runner({
+    model,
+    tracingDisabled: true,
+  });
+
+  const publishingAgent = createPublishingAgent();
+  const { context: testContext, tracker } = createTestContext();
+
+  const initialResult = await runner.run(
+    publishingAgent,
+    "Publish the NVIDIA financial research report.",
+    { context: testContext },
+  );
+
+  assert.equal(initialResult.interruptions.length, 1);
+
+  const interruption = initialResult.interruptions[0];
+  initialResult.state.reject(interruption);
+
+  // Step 3: Resume workflow.
+  const resumedResult = await runner.run(publishingAgent, initialResult.state, {
+    context: testContext,
+  });
+
+  // Step 4: Verify publishing never executed.
+  assert.equal(tracker.publishExecutions, 0);
+
+  assert.equal(resumedResult.interruptions.length, 0);
+
+  assert.equal(
+    resumedResult.finalOutput,
+    "The publishing request was rejected. The report was not published.",
+  );
+
+  model.assertComplete();
+});
+
+test("input guardrail rejects an unauthorized destination even after human approval", async () => {
+  const model = new ScriptedModel([
+    [
+      // First response: request publishing.
+      functionCall(
+        "publish_research_report",
+        {
+          company: "NVIDIA",
+          report: "NVIDIA FY2025 financial research report",
+          destination: "external_workspace",
+        },
+        {
+          callId: "call_publish_004",
+        },
+      ),
+    ],
+
+    // Second response: respond after the guardrail rejection.
+    [
+      assistantMessage(
+        "Publishing was blocked because the destination is not authorized.",
+      ),
+    ],
+  ]);
+
+  const runner = new Runner({
+    model,
+    tracingDisabled: true,
+  });
+
+  const publishingAgent = createPublishingAgent();
+  const { context: testContext, tracker } = createTestContext();
+
+  const initialResult = await runner.run(
+    publishingAgent,
+    "Publish the NVIDIA report to the external workspace.",
+    { context: testContext },
+  );
+
+  assert.equal(initialResult.interruptions.length, 1);
+
+  const interruption = initialResult.interruptions[0];
+
+  // Step 2: Human approves the request.
+  initialResult.state.approve(interruption);
+
+  // Step 3: Resume the workflow.
+  const resumedResult = await runner.run(publishingAgent, initialResult.state, {
+    context: testContext,
+  });
+
+  // Step 4: Verify the input guardrail blocked execution.
+  assert.equal(tracker.publishExecutions, 0);
+  assert.equal(resumedResult.interruptions.length, 0);
+  model.assertComplete();
+});
+
+test("multiple publishing requests require separate approvals", async () => {
+  const model = new ScriptedModel([
+    [
+      functionCall(
+        "publish_research_report",
+        {
+          company: "NVIDIA",
+          report: "NVIDIA FY2025 financial research report",
+          destination: "research_workspace",
+        },
+        { callId: "call_publish_005" },
+      ),
+    ],
+    [
+      functionCall(
+        "publish_research_report",
+        {
+          company: "Apple",
+          report: "Apple FY2025 financial research report",
+          destination: "research_workspace",
+        },
+        { callId: "call_publish_006" },
+      ),
+    ],
+    [
+      assistantMessage(
+        "Both NVIDIA and Apple research reports were published successfully.",
+      ),
+    ],
+  ]);
+
+  const runner = new Runner({
+    model,
+    tracingDisabled: true,
+  });
+
+  const publishingAgent = createPublishingAgent();
+  const { context: testContext, tracker } = createTestContext();
+
+  const firstRun = await runner.run(
+    publishingAgent,
+    "Publish the NVIDIA and Apple research reports.",
+    {
+      context: testContext,
+    },
+  );
+
+  assert.equal(firstRun.interruptions.length, 1);
+  assert.equal(tracker.publishExecutions, 0);
+
+  // Approve NVIDIA.
+  firstRun.state.approve(firstRun.interruptions[0]);
+
+  const secondRun = await runner.run(publishingAgent, firstRun.state, {
+    context: testContext,
+  });
+
+  // Second publishing request should now require approval.
+  assert.equal(secondRun.interruptions.length, 1);
+  assert.equal(tracker.publishExecutions, 1);
+
+  // // Approve Apple.
+  secondRun.state.approve(secondRun.interruptions[0]);
+
+  const finalResult = await runner.run(publishingAgent, secondRun.state, {
+    context: testContext,
+  });
+
+  assert.equal(finalResult.interruptions.length, 0);
+  assert.equal(tracker.publishExecutions, 2);
+
+  assert.equal(
+    finalResult.finalOutput,
+    "Both NVIDIA and Apple research reports were published successfully.",
+  );
+
+  model.assertComplete();
+});
