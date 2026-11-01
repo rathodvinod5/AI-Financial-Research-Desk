@@ -11,15 +11,6 @@ import {
 import { publishResearchReport } from "../tools/report-tools.js";
 
 function createTestContext() {
-  //   return {
-  //     researchId: "hitl-test-001",
-  //     userId: "test-user",
-  //     company: "NVIDIA",
-  //     logger: {
-  //       info() {},
-  //     },
-  //   };
-
   const tracker = {
     publishExecutions: 0,
   };
