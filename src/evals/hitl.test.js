@@ -222,3 +222,60 @@ test("rejecting publishing prevents tool execution", async () => {
 
   model.assertComplete();
 });
+
+test("input guardrail rejects an unauthorized destination even after human approval", async () => {
+  const model = new ScriptedModel([
+    [
+      // First response: request publishing.
+      functionCall(
+        "publish_research_report",
+        {
+          company: "NVIDIA",
+          report: "NVIDIA FY2025 financial research report",
+          destination: "external_workspace",
+        },
+        {
+          callId: "call_publish_004",
+        },
+      ),
+    ],
+
+    // Second response: respond after the guardrail rejection.
+    [
+      assistantMessage(
+        "Publishing was blocked because the destination is not authorized.",
+      ),
+    ],
+  ]);
+
+  const runner = new Runner({
+    model,
+    tracingDisabled: true,
+  });
+
+  const publishingAgent = createPublishingAgent();
+  const { context: testContext, tracker } = createTestContext();
+
+  const initialResult = await runner.run(
+    publishingAgent,
+    "Publish the NVIDIA report to the external workspace.",
+    { context: testContext },
+  );
+
+  assert.equal(initialResult.interruptions.length, 1);
+
+  const interruption = initialResult.interruptions[0];
+
+  // Step 2: Human approves the request.
+  initialResult.state.approve(interruption);
+
+  // Step 3: Resume the workflow.
+  const resumedResult = await runner.run(publishingAgent, initialResult.state, {
+    context: testContext,
+  });
+
+  // Step 4: Verify the input guardrail blocked execution.
+  assert.equal(tracker.publishExecutions, 0);
+  assert.equal(resumedResult.interruptions.length, 0);
+  model.assertComplete();
+});
