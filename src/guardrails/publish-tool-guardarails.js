@@ -19,7 +19,7 @@ export const publishToolInputGuardrail = defineToolInputGuardrail({
       );
     }
 
-    const allowedDestinations = ["research-workspace"];
+    const allowedDestinations = ["research_workspace"];
 
     if (!allowedDestinations.includes(args.destination)) {
       return ToolGuardrailFunctionOutputFactory.rejectContent(

@@ -13,7 +13,8 @@
     "test:financial-analyst:missing-data:deterministic": "node --test src/evals/financial-analyst-missing-data.deterministic.test.js",
     "test:financial-tools": "node --test src/evals/financial-tools.test.js",
     "test:tool-guardrails": "node --test src/evals/tool-guardrails.test.js",
-    "test:agent-guardrails": "node --test src/evals/agent-guardrails.test.js"
+    "test:agent-guardrails": "node --test src/evals/agent-guardrails.test.js",
+    "test:hitl": "node --test src/evals/hitl.test.js"
   },
   "keywords": [],
   "author": "",
