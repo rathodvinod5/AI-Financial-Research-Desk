@@ -1,6 +1,23 @@
 import { tool } from "@openai/agents";
 import { z } from "zod";
 
+export const companyFinancialsParams = z.object({
+  company: z
+    .string()
+    .trim()
+    .min(1, "Company name is required")
+    .describe("Company name, for example NVIDIA or Apple"),
+  year: z.number().int().min(2020).max(2026),
+});
+
+export const marketDataParams = z.object({
+  company: z
+    .string()
+    .trim()
+    .min(1, "Company name is required")
+    .describe("Company name, for example NVIDIA or Apple"),
+});
+
 export function lookupCompanyFinancials(company, year, userId) {
   const financialData = {
     NVIDIA: {
@@ -82,10 +99,11 @@ export const getCompanyFinancials = tool({
   name: "get_company_financials",
   description:
     "Get key financial metrics for a public company for a specific year.",
-  parameters: z.object({
-    company: z.string().describe("Company name, for example NVIDIA or Apple"),
-    year: z.number().int().min(2020).max(2026),
-  }),
+  // parameters: z.object({
+  //   company: z.string().describe("Company name, for example NVIDIA or Apple"),
+  //   year: z.number().int().min(2020).max(2026),
+  // }),
+  parameters: companyFinancialsParams,
   execute: async ({ company, year }, runContext) => {
     const { researchId, userId, logger } = runContext.context;
 
@@ -100,9 +118,10 @@ export const getCompanyFinancials = tool({
 export const getMarketData = tool({
   name: "get_market_data",
   description: "Get market information for a public company.",
-  parameters: z.object({
-    company: z.string().describe("Company name, for example NVIDIA or Apple"),
-  }),
+  // parameters: z.object({
+  //   company: z.string().describe("Company name, for example NVIDIA or Apple"),
+  // }),
+  parameters: marketDataParams,
   execute: async ({ company }, runContext) => {
     const { researchId, logger } = runContext.context;
 
