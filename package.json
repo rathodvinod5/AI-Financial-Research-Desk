@@ -15,7 +15,8 @@
     "test:tool-guardrails": "node --test src/evals/tool-guardrails.test.js",
     "test:agent-guardrails": "node --test src/evals/agent-guardrails.test.js",
     "test:hitl": "node --test src/evals/hitl.test.js",
-    "test:research-manager": "node --test src/evals/research-manager.test.js"
+    "test:research-manager": "node --test src/evals/research-manager.test.js",
+    "test:financial-tools:regression": "node --test src/evals/regression-testing/financial-tools.validation.test.js"
   },
   "keywords": [],
   "author": "",

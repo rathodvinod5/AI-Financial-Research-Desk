@@ -45,12 +45,17 @@ test("getMarketData handles an unknown company", () => {
   assert.equal(result.found, false);
 });
 
-// test("getCompanyFinancials returns NVIDIA FY2025 metrics", async () => {
-//   const result = await getCompanyFinancials.execute(
-//     {
-//       company: "NVIDIA",
-//       year: 2025,
-//     },
-//     context,
-//   );
-// });
+test("Regression: empty company name should return no financial data", () => {
+  const result = lookupCompanyFinancials("", 2025, "test-user");
+
+  assert.equal(result.found, false);
+  assert.equal(result.company, "");
+});
+
+test("Regression: missing company name should return no market data", () => {
+  const result = lookupMarketData(undefined);
+
+  assert.equal(result.found, false);
+  assert.equal(result.company, undefined);
+  assert.ok(result.message);
+});
