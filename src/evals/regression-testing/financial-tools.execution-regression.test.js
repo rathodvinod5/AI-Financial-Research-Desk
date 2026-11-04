@@ -46,36 +46,107 @@ test("Regression: market tool propagates lookup execution errors", async () => {
   );
 });
 
-test("Regression: financial tool handles an unexpected lookup response", async () => {
+test("Regression: rejects financial response with missing metrics", async () => {
   const unexpectedLookup = async () => ({
     company: "NVIDIA",
+    year: 2025,
     found: true,
-    // Required financial metrics are missing
   });
 
-  const result = await executeCompanyFinancials(
-    { company: "NVIDIA", year: 2025 },
-    runContext,
-    unexpectedLookup,
+  await assert.rejects(
+    executeCompanyFinancials(
+      { company: "NVIDIA", year: 2025 },
+      runContext,
+      unexpectedLookup,
+    ),
+    { name: "ZodError" },
   );
-
-  assert.equal(result.found, true);
-  assert.equal(result.revenue, undefined);
 });
 
-test("Regression: market tool handles an unexpected lookup response", async () => {
+test("Regression: rejects market response with missing metrics", async () => {
   const unexpectedLookup = async () => ({
     company: "NVIDIA",
     found: true,
-    // Required financial metrics are missing
+  });
+
+  await assert.rejects(
+    executeMarketData({ company: "NVIDIA" }, runContext, unexpectedLookup),
+    { name: "ZodError" },
+  );
+});
+
+test("Regression: rejects financial response with invalid metric types", async () => {
+  const unexpectedLookup = async () => ({
+    company: "NVIDIA",
+    year: 2025,
+    found: true,
+    requestedBy: "test-user",
+    currency: "USD billions",
+    revenue: "130.5",
+    revenueGrowth: 114,
+    grossMargin: 75,
+    operatingMargin: 61.6,
+  });
+
+  await assert.rejects(
+    executeCompanyFinancials(
+      { company: "NVIDIA", year: 2025 },
+      runContext,
+      unexpectedLookup,
+    ),
+    { name: "ZodError" },
+  );
+});
+
+test("Regression: rejects market response with invalid metric types", async () => {
+  const unexpectedLookup = async () => ({
+    company: "NVIDIA",
+    found: true,
+    currency: "USD",
+    marketCapUnit: "USD billions",
+    ticker: "NVDA",
+    price: "182.41",
+    marketCap: 4450,
+    dailyChangePercent: 1.84,
+  });
+
+  await assert.rejects(
+    executeMarketData({ company: "NVIDIA" }, runContext, unexpectedLookup),
+    { name: "ZodError" },
+  );
+});
+
+test("Regression: accepts legitimate unavailable financial data", async () => {
+  const unavailableLookup = async () => ({
+    company: "UNKNOWN_CORP",
+    year: 2025,
+    found: false,
+    message: "Financial data not available.",
   });
 
   const result = await executeCompanyFinancials(
-    { company: "NVIDIA", year: undefined },
+    { company: "UNKNOWN_CORP", year: 2025 },
     runContext,
-    unexpectedLookup,
+    unavailableLookup,
   );
 
-  assert.equal(result.found, true);
-  assert.equal(result.price, undefined);
+  assert.equal(result.found, false);
+  assert.equal(result.company, "UNKNOWN_CORP");
+});
+
+test("Regression: accepts legitimate unavailable market data", async () => {
+  const unavailableLookup = async () => ({
+    company: "UNKNOWN_CORP",
+    found: false,
+    message: "Market data is not available.",
+  });
+
+  const result = await executeMarketData(
+    { company: "UNKNOWN_CORP" },
+    runContext,
+    unavailableLookup,
+  );
+
+  assert.equal(result.found, false);
+  assert.equal(result.company, "UNKNOWN_CORP");
 });
