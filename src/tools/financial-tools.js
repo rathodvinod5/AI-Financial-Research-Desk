@@ -18,6 +18,44 @@ export const marketDataParams = z.object({
     .describe("Company name, for example NVIDIA or Apple"),
 });
 
+export const companyFinancialsOutput = z.discriminatedUnion("found", [
+  z.object({
+    company: z.string(),
+    year: z.number(),
+    found: z.literal(false),
+    message: z.string(),
+  }),
+  z.object({
+    company: z.string(),
+    year: z.number(),
+    found: z.literal(true),
+    requestedBy: z.string(),
+    currency: z.string(),
+    revenue: z.number(),
+    revenueGrowth: z.number(),
+    grossMargin: z.number(),
+    operatingMargin: z.number(),
+  }),
+]);
+
+export const marketDataOutput = z.discriminatedUnion("found", [
+  z.object({
+    company: z.string(),
+    found: z.literal(false),
+    message: z.string(),
+  }),
+  z.object({
+    company: z.string(),
+    found: z.literal(true),
+    currency: z.string(),
+    marketCapUnit: z.string(),
+    ticker: z.string(),
+    price: z.number(),
+    marketCap: z.number(),
+    dailyChangePercent: z.number(),
+  }),
+]);
+
 export async function executeCompanyFinancials(
   { company, year },
   runContext,
@@ -27,7 +65,8 @@ export async function executeCompanyFinancials(
 
   logger.info(`Research ${researchId}: fetching financial data for ${company}`);
 
-  return lookup(company, year, userId);
+  const result = await lookup(company, year, userId);
+  return companyFinancialsOutput.parse(result);
 }
 
 export async function executeMarketData(
@@ -39,7 +78,8 @@ export async function executeMarketData(
 
   logger.info(`Research ${researchId}: fetching market data for ${company}`);
 
-  return lookup(company);
+  const result = await lookup(company);
+  return marketDataOutput.parse(result);
 }
 
 export function lookupCompanyFinancials(company, year, userId) {
